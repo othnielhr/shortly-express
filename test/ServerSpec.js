@@ -1,5 +1,5 @@
 var expect = require('chai').expect;
-var mysql = require('mysql');
+var mysql = require('mysql2');
 var request = require('request');
 var httpMocks = require('node-mocks-http');
 
