@@ -61,7 +61,7 @@ describe('', function() {
     afterEach(function() { server.close(); });
   });
 
-  describe('Database Schema:', function() {
+  xdescribe('Database Schema:', function() {
     it('contains a users table', function(done) {
       var queryString = 'SELECT * FROM users';
       db.query(queryString, function(err, results) {
@@ -140,6 +140,7 @@ describe('', function() {
         db.query(queryString, function(err, rows) {
           if (err) { done(err); }
           var user = rows[0];
+          // console.log(rows);
           expect(user).to.exist;
           expect(user.username).to.equal('Samantha');
           done();
@@ -158,11 +159,13 @@ describe('', function() {
       };
 
       request(options, function(error, res, body) {
+        // console.log('response', body);
         if (error) { return done(error); }
         var queryString = 'SELECT password FROM users where username = "Samantha"';
         db.query(queryString, function(err, rows) {
           if (err) { return done (err); }
           var user = rows[0];
+          // console.log('password test: ', rows);
           expect(user.password).to.exist;
           expect(user.password).to.not.equal('Samantha');
           done();
@@ -208,7 +211,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Account Login:', function() {
+  describe('Account Login:', function() {
 
     beforeEach(function(done) {
       var options = {

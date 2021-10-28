@@ -42,16 +42,55 @@ app.post('/signup', (req, res, next) => {
   // console.log(req.body);
   var username = req.body.username;
   var password = req.body.password;
-  return models.Users.get(username)
+  // models.Users.create({username, password})
+  //   .then(response => {
+  //     console.log('success');
+  //     res.send(200);
+  //   })
+  //   .catch(err => {
+  //     res.send(500);
+  //   });
+  models.Users.get(username)
     .then(newUser => {
-      // console.log('new user', newUser);
       if (newUser) {
         console.log('existing user found');
+        res.sendStatus(500);
       } else {
-        models.Users.create({username, password});
+        return models.Users.create({username, password});
       }
     })
-    .catch(res.send('created new user'));
+    .then(success => {
+      res.redirect(200, '/');
+    })
+    .catch(err => {
+      res.redirect('/signup');
+      // console.log(err);
+    });
+});
+
+app.post('/login', (req, res, next) => {
+  var username = req.body.username;
+  var password = req.body.password;
+  // console.log('req: ', req.body);
+  models.Users.get({username})
+    .then(user => {
+      // console.log('user: ', user);
+      if (user) {
+        if (models.Users.compare(password, user.password, user.salt)) {
+          res.redirect(202, '/');
+        } else {
+          console.log('invalid password');
+          res.redirect('/login');
+        }
+      } else {
+        console.log('invalid username');
+        res.redirect('/login');
+      }
+    })
+    .catch(err => {
+      console.log('catch');
+      res.redirect(500, '/login');
+    });
 });
 
 app.post('/links',
