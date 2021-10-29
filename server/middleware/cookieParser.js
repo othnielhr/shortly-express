@@ -1,3 +1,6 @@
+const auth = require('./auth');
+const models = require('../models');
+
 const parseCookies = (req, res, next) => {
   // console.log(req);
   if (req.headers.cookie) {

@@ -5,6 +5,7 @@ const partials = require('express-partials');
 const bodyParser = require('body-parser');
 const Auth = require('./middleware/auth');
 const models = require('./models');
+const parseCookies = require('./middleware/cookieParser');
 
 const app = express();
 
@@ -14,7 +15,8 @@ app.use(partials());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
-
+app.use(parseCookies);
+app.use(Auth.createSession);
 
 
 app.get('/',
@@ -39,17 +41,8 @@ app.get('/links',
   });
 
 app.post('/signup', (req, res, next) => {
-  // console.log(req.body);
   var username = req.body.username;
   var password = req.body.password;
-  // models.Users.create({username, password})
-  //   .then(response => {
-  //     console.log('success');
-  //     res.send(200);
-  //   })
-  //   .catch(err => {
-  //     res.send(500);
-  //   });
   models.Users.get(username)
     .then(newUser => {
       if (newUser) {
@@ -64,20 +57,25 @@ app.post('/signup', (req, res, next) => {
     })
     .catch(err => {
       res.redirect('/signup');
-      // console.log(err);
     });
 });
 
 app.post('/login', (req, res, next) => {
   var username = req.body.username;
   var password = req.body.password;
-  // console.log('req: ', req.body);
   models.Users.get({username})
     .then(user => {
-      // console.log('user: ', user);
       if (user) {
+        // console.log('user: ', user);
         if (models.Users.compare(password, user.password, user.salt)) {
-          res.redirect(202, '/');
+          models.Sessions.update({hash: req.session.hash}, {userId: user.id})
+            .then(data => {
+              // console.log('data: ', data);
+              req.session.userId = data.insertId;
+              req.session.user = {username};
+              console.log(req.session);
+              res.redirect('/');
+            });
         } else {
           console.log('invalid password');
           res.redirect('/login');
