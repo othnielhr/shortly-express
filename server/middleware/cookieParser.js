@@ -3,6 +3,7 @@ const models = require('../models');
 
 const parseCookies = (req, res, next) => {
   // console.log(req);
+  var cookieObj = {};
   if (req.headers.cookie) {
     var cookieStr = req.headers.cookie;
     // console.log(cookieStr);
@@ -11,11 +12,12 @@ const parseCookies = (req, res, next) => {
     cookieArr.forEach((data) => {
       var splitCookie = data.split('=');
       // console.log(splitCookie);
-      req.cookies[splitCookie[0]] = splitCookie[1];
+      cookieObj[splitCookie[0]] = splitCookie[1];
     });
   }
-  next();
+  req.cookies = cookieObj;
   // console.log(req.cookies);
+  next();
 };
 
 module.exports = parseCookies;

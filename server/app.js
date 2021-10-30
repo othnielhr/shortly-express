@@ -52,8 +52,14 @@ app.post('/signup', (req, res, next) => {
         return models.Users.create({username, password});
       }
     })
-    .then(success => {
-      res.redirect(200, '/');
+    .then(data => {
+      // console.log('newUser: ', newUser);
+      models.Sessions.update({hash: req.session.hash}, {userId: data.insertId})
+        .then(data => {
+          req.session.userId = data.insertId;
+          req.session.user = {username};
+          res.redirect(200, '/');
+        });
     })
     .catch(err => {
       res.redirect('/signup');
@@ -73,7 +79,7 @@ app.post('/login', (req, res, next) => {
               // console.log('data: ', data);
               req.session.userId = data.insertId;
               req.session.user = {username};
-              console.log(req.session);
+              // console.log(req.session);
               res.redirect('/');
             });
         } else {
@@ -88,6 +94,15 @@ app.post('/login', (req, res, next) => {
     .catch(err => {
       console.log('catch');
       res.redirect(500, '/login');
+    });
+});
+
+app.get('/logout', (req, res, next) => {
+  models.Sessions.delete({hash: req.session.hash})
+    .then(() => {
+      res.cookie('shortlyid', null);
+      // console.log('delete');
+      res.redirect('/login');
     });
 });
 
