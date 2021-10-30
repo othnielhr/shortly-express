@@ -19,17 +19,17 @@ app.use(parseCookies);
 app.use(Auth.createSession);
 
 
-app.get('/',
+app.get('/', Auth.verifySession, (req, res) => {
+  // console.log(req.session);
+  res.render('index');
+});
+
+app.get('/create', Auth.verifySession,
   (req, res) => {
     res.render('index');
   });
 
-app.get('/create',
-  (req, res) => {
-    res.render('index');
-  });
-
-app.get('/links',
+app.get('/links', Auth.verifySession,
   (req, res, next) => {
     models.Links.getAll()
       .then(links => {
@@ -40,15 +40,23 @@ app.get('/links',
       });
   });
 
+app.get('/signup', (req, res, next) => {
+  res.render('signup');
+});
+
 app.post('/signup', (req, res, next) => {
   var username = req.body.username;
   var password = req.body.password;
   models.Users.get(username)
     .then(newUser => {
       if (newUser) {
-        console.log('existing user found');
+        // console.log('existing user found');
         res.sendStatus(500);
       } else {
+        if (password.length < 3) {
+          console.log('password needs to be at least 3 characters long');
+          throw (err);
+        }
         return models.Users.create({username, password});
       }
     })
@@ -58,12 +66,18 @@ app.post('/signup', (req, res, next) => {
         .then(data => {
           req.session.userId = data.insertId;
           req.session.user = {username};
+          // console.log('here');
           res.redirect(200, '/');
         });
     })
     .catch(err => {
       res.redirect('/signup');
     });
+});
+
+app.get('/login', (req, res, next) => {
+  // here
+  res.render('login');
 });
 
 app.post('/login', (req, res, next) => {
@@ -145,7 +159,6 @@ app.post('/links',
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
-
 
 
 /************************************************************/

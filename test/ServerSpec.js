@@ -61,7 +61,7 @@ describe('', function() {
     afterEach(function() { server.close(); });
   });
 
-  xdescribe('Database Schema:', function() {
+  describe('Database Schema:', function() {
     it('contains a users table', function(done) {
       var queryString = 'SELECT * FROM users';
       db.query(queryString, function(err, results) {
@@ -573,7 +573,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Privileged Access:', function() {
+  describe('Privileged Access:', function() {
 
     it('Redirects to login page if a user tries to access the main page and is not signed in', function(done) {
       request('http://127.0.0.1:4568/', function(error, res, body) {
@@ -600,7 +600,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Link creation:', function() {
+  describe('Link creation:', function() {
 
     var cookies = request.jar();
     var requestWithSession = request.defaults({ jar: cookies });
@@ -613,7 +613,7 @@ describe('', function() {
       }
     };
 
-    xbeforeEach(function(done) {
+    beforeEach(function(done) {
       var options = {
         'method': 'POST',
         'followAllRedirects': true,
@@ -764,5 +764,33 @@ describe('', function() {
         });
       });
     });
+  });
+  /* ------------------------------------------------------------------------
+ * --------------------------------------------------------------------------
+ * ---------------------------OUR TESTS HERE---------------------------------
+ * --------------------------------------------------------------------------
+ * --------------------------------------------------------------------------*/
+  describe('New Tests', function() {
+    it('redirects back to /signup if password length is less than 3 characters', function(done) {
+      var options = {
+        'method': 'POST',
+        'uri': 'http://127.0.0.1:4568/signup',
+        'json': {
+          'username': 'user',
+          'password': '12'
+        }
+      };
+
+      request(options, function(error, res, body) {
+        if (error) { return done(error); }
+        request(options, function(err, response, resBody) {
+          if (err) { return done(err); }
+          expect(response.headers.location).to.equal('/signup');
+          done();
+        });
+      });
+    });
+
+
   });
 });
